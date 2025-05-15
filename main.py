@@ -48,42 +48,42 @@ def get_weather(province, city):
     return weather, temp, tempn
 
 
-# 获取今天是第几周，返回字符串
-def get_Today_Week():
-    y = config.year
-    m = config.month
-    d = config.day
-    startWeek = datetime(y, m, d)
-    today = datetime.today()
-    d_days = today - startWeek
-    trueWeek = (d_days.days // 7) + 1
-    return str(trueWeek)
+# # 获取今天是第几周，返回字符串
+# def get_Today_Week():
+#     y = config.year
+#     m = config.month
+#     d = config.day
+#     startWeek = datetime(y, m, d)
+#     today = datetime.today()
+#     d_days = today - startWeek
+#     trueWeek = (d_days.days // 7) + 1
+#     return str(trueWeek)
 
 
-# 获取本周课程
-def get_Week_Classes(w):
-    if w is not None:
-        week_Class = config.classes.get(w)
-    else:
-        week = get_Today_Week()
-        week_Class = config.classes.get(week)
-    return week_Class
+# # 获取本周课程
+# def get_Week_Classes(w):
+#     if w is not None:
+#         week_Class = config.classes.get(w)
+#     else:
+#         week = get_Today_Week()
+#         week_Class = config.classes.get(week)
+#     return week_Class
 
 
-# 获取今日课程
-def get_Today_Class():
-    year = localtime().tm_year
-    month = localtime().tm_mon
-    day = localtime().tm_mday
-    today = datetime.date(datetime(year=year, month=month, day=day))
-    todayClasses = get_Week_Classes(None)[today.weekday()]
-    return todayClasses
+# # 获取今日课程
+# def get_Today_Class():
+#     year = localtime().tm_year
+#     month = localtime().tm_mon
+#     day = localtime().tm_mday
+#     today = datetime.date(datetime(year=year, month=month, day=day))
+#     todayClasses = get_Week_Classes(None)[today.weekday()]
+#     return todayClasses
 
 
-# 获取指定星期几的课程
-def get_Class(day):
-    theClasses = get_Week_Classes(None)[day]
-    return theClasses
+# # 获取指定星期几的课程
+# def get_Class(day):
+#     theClasses = get_Week_Classes(None)[day]
+#     return theClasses
 
 
 # # 发送本周所有课程，周一的时候发
@@ -121,8 +121,8 @@ def send_message(to_user, access_token, city_name, weather, max_temperature, min
     today = datetime.date(datetime(year=year, month=month, day=day))
     # 星期几
     week = week_list[today.weekday()]
-    # 开学的第几周
-    weeks = get_Today_Week()
+    # # 开学的第几周
+    # weeks = get_Today_Week()
     # 获取在一起的日子的日期格式
     love_year = int(config.love_date.split("-")[0])
     love_month = int(config.love_date.split("-")[1])
