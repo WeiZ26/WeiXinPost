@@ -153,10 +153,6 @@ def send_message(to_user, access_token, city_name, weather, max_temperature, min
         "url": "http://weixin.qq.com/download",
         "topcolor": "#FF0000",
         "data": {
-            "weeks": {
-                "value": weeks,
-                "color": "#00FFFF"
-            },
             "date": {
                 "value": "{} {}".format(today, week),
                 "color": "#00FFFF"
