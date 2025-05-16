@@ -99,8 +99,8 @@ def send_message(to_user, access_token, city_name, weather, max_temperature, min
         data = r.json()
         
         # 检查API响应是否包含newslist
-        if "newslist" in data and len(data["newslist"]) > 0:
-            good_Night = data["newslist"][0]["content"]
+        if "result" in data and "content" in data["result"]:
+            good_Night = data["result"]["content"]
         else:
             print(f"API响应格式异常: {data}")
             good_Night = "今日问候语获取失败"
