@@ -47,7 +47,6 @@ def get_weather(province, city):
     tempn = weatherinfo["tempn"]
     return weather, temp, tempn
 
-
 # # 获取今天是第几周，返回字符串
 # def get_Today_Week():
 #     y = config.year
@@ -144,8 +143,14 @@ def send_message(to_user, access_token, city_name, weather, max_temperature, min
     else:
         birth_date = year_date
         birth_day = str(birth_date.__sub__(today)).split(" ")[0]
-
-    # theClass = get_Today_Class()
+     # 获取天行数据每日一句
+    txUrl = "http://api.tianapi.com/caihongpi/index"
+    key = config.good_Night_Key
+    pre_data = {"key": key}
+    # param = json.dumps((pre_data))
+    r = post(txUrl, params=pre_data, headers=headers)
+    print("r:", r.text)
+    good_Night = r.json()["newslist"][0]["content"]
     theuser = to_user[0]
     data = {
         "touser": theuser,
@@ -180,7 +185,10 @@ def send_message(to_user, access_token, city_name, weather, max_temperature, min
             "birthday": {
                 "value": birth_day,
                 "color": "#FF8000"
-            }
+            },
+            "goodNight": {
+                "value": good_Night,
+                "color": "#87CEEB"
         }
     }
     headers = {
@@ -215,97 +223,6 @@ def send_Class_Message(to_user, access_token, classInfo):
     }
     response = post(url, headers=headers, json=data)
     print(response.text)
-
-
-# 发送晚安心语及第二天课程
-def send_Good_Night(to_user, access_token):
-    week_list = ["星期一", "星期二", "星期三", "星期四", "星期五", "星期六", "星期日"]
-    headers = {
-        'Content-Type': 'application/json',
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) '
-                      'AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Safari/537.36'
-    }
-    # 获取天行数据晚安心语
-    txUrl = "http://api.tianapi.com/wanan/index"
-    key = config.good_Night_Key
-    pre_data = {"key": key}
-    # param = json.dumps((pre_data))
-    r = post(txUrl, params=pre_data, headers=headers)
-    print("r:", r.text)
-    good_Night = r.json()["newslist"][0]["content"]
-    # good_Night = "晚安"
-    # 获取第二天课表
-    year = localtime().tm_year
-    month = localtime().tm_mon
-    day = localtime().tm_mday
-    today = datetime.date(datetime(year=year, month=month, day=day))
-    weekClasses = get_Week_Classes(None)
-    week = week_list[(today.weekday() + 1) % 7]
-    theClass = []
-    if (today.weekday() + 1) % 7 == 0:
-        weekClasses = get_Week_Classes(get_Today_Week())
-        theClass = weekClasses[0]
-    else:
-        theClass = weekClasses[today.weekday() + 1]
-
-    url = "https://api.weixin.qq.com/cgi-bin/message/template/send?access_token={}".format(access_token)
-    theuser = to_user[0]
-    data = {
-        "touser": theuser,
-        "template_id": config.template_id3,
-        "url": "http://weixin.qq.com/download",
-        "topcolor": "#FF0000",
-        "data": {
-            "goodNight": {
-                "value": good_Night,
-                "color": "#87CEEB"
-            },
-            "week": {
-                "value": week,
-                "color": "#00FFFF"
-            },
-            "firstClass": {
-                "value": theClass[0],
-                "color": "#FF8000"
-            },
-            "secondClass": {
-                "value": theClass[1],
-                "color": "#FF8000"
-            },
-            "thirdClass": {
-                "value": theClass[2],
-                "color": "#FF8000"
-            },
-            "fourthClass": {
-                "value": theClass[3],
-                "color": "#FF8000"
-            },
-            "fifthClass": {
-                "value": theClass[4],
-                "color": "#FF8000"
-            },
-            "sixthClass": {
-                "value": theClass[5],
-                "color": "#FF8000"
-            }
-        }
-    }
-    response = post(url, headers=headers, json=data)
-    print(response.text)
-
-
-# 计算时间间隔
-def calculate_Time_Difference(t1, t2):
-    h1 = int(t1[0:2])
-    h2 = int(t2[0:2])
-    m1 = int(t1[3:5])
-    m2 = int(t2[3:5])
-    s1 = int(t1[6:8])
-    s2 = int(t2[6:8])
-    d1 = datetime(2022, 1, 1, h1, m1, s1)
-    d2 = datetime(2022, 1, 1, h2, m2, s2)
-    return (d1 - d2).seconds
-
 
 if __name__ == '__main__':
     # 获取accessToken
