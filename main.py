@@ -83,6 +83,11 @@ def send_message(to_user, access_token, city_name, weather, max_temperature, min
     else:
         birth_date = year_date
         birth_day = str(birth_date.__sub__(today)).split(" ")[0]
+    # 定义headers变量
+    headers = {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) '
+                      'AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Safari/537.36'
+    }
     # 获取天行数据每日一句
     txUrl = "http://apis.tianapi.com/zaoan/index"
     key = config.good_Night_Key
@@ -132,12 +137,12 @@ def send_message(to_user, access_token, city_name, weather, max_temperature, min
                 }
             }
         }
-        headers = {
+        # 微信消息推送的headers（单独定义，避免混淆）
+        wechat_headers = {
             'Content-Type': 'application/json',
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) '
-                          'AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Safari/537.36'
+            'User-Agent': headers['User-Agent']  # 复用之前的User-Agent
         }
-        response = post(url, headers=headers, json=data)
+        response = post(url, headers=wechat_headers, json=data)
         response.raise_for_status()
         print("每日信息推送成功")
     except Exception as e:
