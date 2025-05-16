@@ -88,14 +88,25 @@ def send_message(to_user, access_token, city_name, weather, max_temperature, min
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) '
                       'AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Safari/537.36'
     }
-    # 获取天行数据每日一句
-    txUrl = "http://apis.tianapi.com/zaoan/index"
-    key = config.good_Night_Key
-    pre_data = {"key": key}
-    try:
-        r = post(txUrl, params=pre_data, headers=headers)
-        r.raise_for_status()
-        good_Night = r.json()["newslist"][0]["content"]
+    # 获取早安问候语
+        txUrl = "http://apis.tianapi.com/zaoan/index"
+        key = config.good_Night_Key  # 确保config中有正确的API密钥
+        pre_data = {"key": key}
+        try:
+            r = post(txUrl, params=pre_data, headers=headers)
+            r.raise_for_status()
+            data = r.json()
+            
+            # 检查API响应是否包含newslist
+            if "newslist" in data and len(data["newslist"]) > 0:
+                good_Night = data["newslist"][0]["content"]
+            else:
+                print(f"API响应格式异常: {data}")
+                good_Night = "今日问候语获取失败"
+                
+        except Exception as e:
+            print(f"获取早安问候语失败: {e}")
+            good_Night = "今日问候语获取失败"
         theuser = to_user[0]
         data = {
             "touser": theuser,
