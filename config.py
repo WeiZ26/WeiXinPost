@@ -5,7 +5,7 @@ app_id = "wx3cbca07fb69b007b"
 app_secret = "51c3e9af3597b4f503cc28e6ca91bf9e"
 # 模板消息id
 # 每日消息
-template_id1 = "Y3mxql8wOD2C_AFrKpwF2XlWtWCanWswPg9vsU20fRk"
+template_id1 = "UC8RQA1p_PF_9D5bK0rN8AVOeHIBMBWxmJl-MzBIy0g"
 # 课程消息,上课提醒
 template_id2 = "loe1yHWr************************************"
 # 晚安心语
