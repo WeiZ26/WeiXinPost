@@ -69,20 +69,6 @@ def send_message(to_user, access_token, city_name, weather, max_temperature, min
     love_date = date(love_year, love_month, love_day)
     # 获取在一起的日期差
     love_days = str(today.__sub__(love_date)).split(" ")[0]
-    # 获取生日的月和日
-    birthday_month = int(config.birthday.split("-")[1])
-    birthday_day = int(config.birthday.split("-")[2])
-    # 今年生日
-    year_date = date(year, birthday_month, birthday_day)
-    # 计算生日年份，如果还没过，按当年减，如果过了需要+1
-    if today > year_date:
-        birth_date = date((year + 1), birthday_month, birthday_day)
-        birth_day = str(birth_date.__sub__(today)).split(" ")[0]
-    elif today == year_date:
-        birth_day = 0
-    else:
-        birth_date = year_date
-        birth_day = str(birth_date.__sub__(today)).split(" ")[0]
     # 定义headers变量
     headers = {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) '
@@ -98,7 +84,8 @@ def send_message(to_user, access_token, city_name, weather, max_temperature, min
         r.raise_for_status()
         data = r.json()
         if "result" in data and "content" in data["result"]:
-            good_Night = data["result"]["content"]
+            raw_sentence = data["result"]["content"]
+            good_Night = f"🌞 {raw_sentence}"  # 拼接表情
         else:
             print(f"API响应格式异常: {data}")
             good_Night = "今日问候语获取失败"
@@ -132,10 +119,6 @@ def send_message(to_user, access_token, city_name, weather, max_temperature, min
                 "love_day": {
                     "value": love_days,
                     "color": "#87CEEB"
-                },
-                "birthday": {
-                    "value": birth_day,
-                    "color": "#FF8000"
                 },
                 "goodNight": {
                     "value": good_Night,
