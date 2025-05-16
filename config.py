@@ -12,7 +12,7 @@ template_id2 = "loe1yHWr************************************"
 template_id3 = "-fun9-2************************************"
 # 接收公众号消息的微信号
 # 这是openid
-user = ["oglvZ7TLVFSVkYJaMCwi43wmBPxU"]
+user = ["oglvZ7ewIl0emJ3vR5II3A-laAoo"]
 
 # 信息配置
 # 所在省份
