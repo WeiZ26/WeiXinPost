@@ -151,5 +151,3 @@ if __name__ == '__main__':
     isPost = False
     send_message(user, accessToken, city, weather, max_temperature, min_temperature)
     isPost = True
-
-基于这个代码修改
