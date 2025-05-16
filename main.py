@@ -90,7 +90,7 @@ def send_message(to_user, access_token, city_name, weather, max_temperature, min
     }
     # 获取天行数据每日一句
     # 注意：这一行和下面的代码应该与上面的代码保持相同的缩进级别
-    txUrl = "http://apis.tianapi.com/zaoan/index"  # 确保这一行与上面的代码对齐
+    txUrl = "http://apis.tianapi.com/saylove/index"  # 确保这一行与上面的代码对齐
     key = config.good_Night_Key
     pre_data = {"key": key}
     try:
