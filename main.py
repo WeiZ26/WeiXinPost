@@ -97,17 +97,11 @@ def send_message(to_user, access_token, city_name, weather, max_temperature, min
         r = post(txUrl, params=pre_data, headers=headers)
         r.raise_for_status()
         data = r.json()
-        
-        # 检查API响应是否包含newslist
         if "result" in data and "content" in data["result"]:
             good_Night = data["result"]["content"]
         else:
             print(f"API响应格式异常: {data}")
             good_Night = "今日问候语获取失败"
-            
-    except Exception as e:
-        print(f"获取早安问候语失败: {e}")
-        good_Night = "今日问候语获取失败"
         theuser = to_user[0]
         data = {
             "touser": theuser,
@@ -155,46 +149,11 @@ def send_message(to_user, access_token, city_name, weather, max_temperature, min
     except Exception as e:
         print(f"每日信息推送失败: {e}")
 
-# 发送课程消息
-def send_Class_Message(to_user, access_token, classInfo):
-    if access_token is None:
-        return
-    url = "https://api.weixin.qq.com/cgi-bin/message/template/send?access_token={}".format(access_token)
-    theuser = to_user[0]
-    data = {
-        "touser": theuser,
-        "template_id": config.template_id2,
-        "url": "http://weixin.qq.com/download",
-        "topcolor": "#FF0000",
-        "data": {
-            "classInfo": {
-                "value": classInfo,
-                "color": "#FF8000"
-            }
-        }
-    }
-    headers = {
-        'Content-Type': 'application/json',
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) '
-                      'AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Safari/537.36'
-    }
-    try:
-        response = post(url, headers=headers, json=data)
-        response.raise_for_status()
-        print("课程信息推送成功！")
-    except Exception as e:
-        print(f"课程信息推送失败: {e}")
-
 # 计算时间差（秒）
 def calculate_Time_Difference(time1, time2):
     t1 = datetime.strptime(time1, '%H:%M:%S')
     t2 = datetime.strptime(time2, '%H:%M:%S')
     return (t1 - t2).total_seconds()
-
-# 发送晚安心语
-def send_Good_Night(to_user, access_token):
-    # 这里需要根据实际需求实现晚安心语的发送逻辑
-    print("晚安心语发送逻辑待实现")
 
 if __name__ == '__main__':
     # 获取accessToken
@@ -207,56 +166,5 @@ if __name__ == '__main__':
     province, city = config.province, config.city
     weather, max_temperature, min_temperature = get_weather(province, city)
     isPost = False
-    # 公众号推送消息
-    if datetime.now().strftime('%H:%M:%S') < config.post_Time:
-        send_message(user, accessToken, city, weather, max_temperature, min_temperature)
-        isPost = True
-    # 课程提醒推送
-    # 这里需要取消注释并确保相关函数和配置正确
-    # todayClasses = get_Today_Class()
-    # time_table = config.time_table
-    # for i in range(len(time_table)):
-    #     if isPost:
-    #         break
-    #     reminderTime = time_table[i]
-    #     while True:
-    #         nowTime = datetime.now().strftime('%H:%M:%S')
-    #         print("当前时间:", nowTime)
-    #         if reminderTime == nowTime:
-    #             if len(todayClasses[i]) != 0:
-    #                 classInfo = "课程信息: " + todayClasses[i] + "\n" + "上课时间: " + config.course_Time[i] + "\n"
-    #                 print(classInfo)
-    #                 send_Class_Message(user, accessToken, classInfo)
-    #             isPost = True
-    #             break
-    #         elif reminderTime < nowTime:
-    #             break
-    #         # 通过睡眠定时
-    #         defference = calculate_Time_Difference(reminderTime, nowTime) - 3
-    #         print("课程推送时间差：", defference, "秒")
-    #         if defference > 0:
-    #             print("开始睡眠: 等待推送第", i + 1, "讲课")
-    #             time.sleep(defference)
-    #             print("结束睡眠")
-    # 晚安心语推送
-    # 这里需要取消注释并确保相关函数和配置正确
-    # while True:
-    #     goodNightTime = config.good_Night_Time
-    #     nowTime = datetime.now().strftime('%H:%M:%S')
-    #     if goodNightTime == nowTime:
-    #         # 发送晚安心语
-    #         send_Good_Night(user, accessToken)
-    #         print("晚安心语推送成功！")
-    #         break
-    #     elif goodNightTime < nowTime:
-    #         print("当前时间已过晚安心语推送设置的时间！")
-    #         break
-    #     elif calculate_Time_Difference(goodNightTime, nowTime) > 120:
-    #         break
-    #     # 通过睡眠定时
-    #     defference = calculate_Time_Difference(goodNightTime, nowTime) - 3
-    #     print("晚安心语推送时间差：", defference, "秒")
-    #     if defference > 0:
-    #         print("开始睡眠:等待推送晚安心语")
-    #         time.sleep(defference)
-    #         print("结束睡眠")
+    send_message(user, accessToken, city, weather, max_temperature, min_temperature)
+    isPost = True
