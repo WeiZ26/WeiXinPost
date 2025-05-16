@@ -149,12 +149,7 @@ def send_message(to_user, access_token, city_name, weather, max_temperature, min
                 }
             }
         }
-        # 微信消息推送的headers（单独定义，避免混淆）
-        wechat_headers = {
-            'Content-Type': 'application/json',
-            'User-Agent': headers['User-Agent']  # 复用之前的User-Agent
-        }
-        response = post(url, headers=wechat_headers, json=data)
+        response = post(url, headers=headers, json=data)
         response.raise_for_status()
         print("每日信息推送成功")
     except Exception as e:
