@@ -84,7 +84,7 @@ def send_message(to_user, access_token, city_name, weather, max_temperature, min
         birth_date = year_date
         birth_day = str(birth_date.__sub__(today)).split(" ")[0]
     # 获取天行数据每日一句
-    txUrl = "http://apis.tianapi.com/caihongpi/index"
+    txUrl = "http://apis.tianapi.com/zaoan/index"
     key = config.good_Night_Key
     pre_data = {"key": key}
     try:
