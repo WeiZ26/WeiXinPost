@@ -7,12 +7,9 @@ from datetime import datetime, date
 
 # 微信获取token
 def get_access_token():
-    # appId
     app_id = config.app_id
-    # appSecret
     app_secret = config.app_secret
-    post_url = ("https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid={}&secret={}"
-                .format(app_id, app_secret))
+    post_url = f"https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid={app_id}&secret={app_secret}"
     try:
         response = get(post_url)
         response.raise_for_status()
@@ -23,114 +20,107 @@ def get_access_token():
 
 # 获取城市天气
 def get_weather(province, city):
-    # 城市id
-    city_id = cityinfo.cityInfo[province][city]["AREAID"]
-    # 毫秒级时间戳
-    t = (int(round(time.time() * 1000)))
-    headers = {
-        "Referer": "http://www.weather.com.cn/weather1d/{}.shtml".format(city_id),
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) '
-                      'AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Safari/537.36'
-    }
-    url = "http://d1.weather.com.cn/dingzhi/{}.html?_={}".format(city_id, t)
     try:
+        city_id = cityinfo.cityInfo[province][city]["AREAID"]
+        t = int(round(time.time() * 1000))
+        headers = {
+            "Referer": f"http://www.weather.com.cn/weather1d/{city_id}.shtml",
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) '
+                          'AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Safari/537.36'
+        }
+        url = f"http://d1.weather.com.cn/dingzhi/{city_id}.html?_={t}"
         response = get(url, headers=headers)
         response.encoding = "utf-8"
         response_data = response.text.split(";")[0].split("=")[-1]
         response_json = eval(response_data)
         weatherinfo = response_json["weatherinfo"]
-        # 天气
-        weather = weatherinfo["weather"]
-        # 最高气温
-        temp = weatherinfo["temp"]
-        # 最低气温
-        tempn = weatherinfo["tempn"]
-        return weather, temp, tempn
+        return weatherinfo["weather"], weatherinfo["temp"], weatherinfo["tempn"]
     except Exception as e:
         print(f"获取天气信息失败: {e}")
         return None, None, None
+
+# 获取合适长度的每日信息
+def get_daily_message(max_length=20, max_retries=3):
+    txUrl = "http://apis.tianapi.com/saylove/index"
+    key = config.good_Night_Key
+    headers = {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) '
+                      'AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Safari/537.36'
+    }
+    
+    for attempt in range(max_retries):
+        try:
+            r = post(txUrl, params={"key": key}, headers=headers)
+            r.raise_for_status()
+            data = r.json()
+            
+            if "result" in data and "content" in data["result"]:
+                content = data["result"]["content"]
+                if len(content) <= max_length:
+                    return f"🌞 {content}"  # 拼接表情并返回
+                else:
+                    print(f"获取的内容长度 {len(content)} 超过限制 {max_length}，尝试重试")
+            else:
+                print(f"API响应格式异常: {data}")
+                
+        except Exception as e:
+            print(f"第 {attempt+1} 次获取每日信息失败: {e}")
+            
+        time.sleep(1)  # 简单延迟避免请求过快
+        
+    return "今日问候语获取失败"  # 所有重试都失败后返回默认值
 
 # 发送每日信息
 def send_message(to_user, access_token, city_name, weather, max_temperature, min_temperature):
     if access_token is None:
         return
-    url = "https://api.weixin.qq.com/cgi-bin/message/template/send?access_token={}".format(access_token)
+        
+    url = f"https://api.weixin.qq.com/cgi-bin/message/template/send?access_token={access_token}"
+    today = datetime.now().date()
     week_list = ["星期一", "星期二", "星期三", "星期四", "星期五", "星期六", "星期日"]
-    year = localtime().tm_year
-    month = localtime().tm_mon
-    day = localtime().tm_mday
-    today = datetime.date(datetime(year=year, month=month, day=day))
-    # 星期几
     week = week_list[today.weekday()]
-    # 获取在一起的日子的日期格式
-    love_year = int(config.love_date.split("-")[0])
-    love_month = int(config.love_date.split("-")[1])
-    love_day = int(config.love_date.split("-")[2])
-    love_date = date(love_year, love_month, love_day)
-    # 获取在一起的日期差
-    love_days = str(today.__sub__(love_date)).split(" ")[0]
-    # 定义headers变量
+    
+    # 计算恋爱天数
+    love_date = date(
+        int(config.love_date.split("-")[0]),
+        int(config.love_date.split("-")[1]),
+        int(config.love_date.split("-")[2])
+    )
+    love_days = (today - love_date).days
+    
+    # 获取合适长度的每日信息
+    good_Night = get_daily_message()
+    
+    data = {
+        "touser": to_user[0],
+        "template_id": config.template_id1,
+        "url": "http://weixin.qq.com/download",
+        "topcolor": "#FF0000",
+        "data": {
+            "date": {"value": f"{today} {week}", "color": "#173177"},
+            "city": {"value": city_name, "color": "#173177"},
+            "weather": {"value": weather, "color": "#173177"},
+            "min_temperature": {"value": min_temperature, "color": "#173177"},
+            "max_temperature": {"value": max_temperature, "color": "#173177"},
+            "love_day": {"value": str(love_days), "color": "#173177"},
+            "goodNight": {"value": good_Night, "color": "#173177"}
+        }
+    }
+    
     headers = {
+        'Content-Type': 'application/json',
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) '
                       'AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Safari/537.36'
     }
-    # 获取天行数据每日一句
-    # 注意：这一行和下面的代码应该与上面的代码保持相同的缩进级别
-    txUrl = "http://apis.tianapi.com/saylove/index"  # 确保这一行与上面的代码对齐
-    key = config.good_Night_Key
-    pre_data = {"key": key}
+    
     try:
-        r = post(txUrl, params=pre_data, headers=headers)
-        r.raise_for_status()
-        data = r.json()
-        if "result" in data and "content" in data["result"]:
-            raw_sentence = data["result"]["content"]
-            good_Night = f"🌞 {raw_sentence}"  # 拼接表情
-        else:
-            print(f"API响应格式异常: {data}")
-            good_Night = "今日问候语获取失败"
-        theuser = to_user[0]
-        data = {
-            "touser": theuser,
-            "template_id": config.template_id1,
-            "url": "http://weixin.qq.com/download",
-            "topcolor": "#FF0000",
-            "data": {
-                "date": {
-                    "value": "{} {}".format(today, week),
-                    "color":"#173177"
-                },
-                "city": {
-                    "value": city_name,
-                    "color":"#173177"
-                },
-                "weather": {
-                    "value": weather,
-                    "color":"#173177"
-                },
-                "min_temperature": {
-                    "value": min_temperature,
-                    "color":"#173177"
-                },
-                "max_temperature": {
-                    "value": max_temperature,
-                    "color":"#173177"
-                },
-                "love_day": {
-                    "value": love_days,
-                    "color":"#173177"
-                },
-                "goodNight": {
-                    "value": good_Night,
-                    "color":"#173177"
-                }
-            }
-        }
         response = post(url, headers=headers, json=data)
         response.raise_for_status()
         print("每日信息推送成功")
     except Exception as e:
         print(f"每日信息推送失败: {e}")
+        if response.status_code != 200:
+            print(f"微信API返回: {response.text}")
 
 # 计算时间差（秒）
 def calculate_Time_Difference(time1, time2):
@@ -139,15 +129,22 @@ def calculate_Time_Difference(time1, time2):
     return (t1 - t2).total_seconds()
 
 if __name__ == '__main__':
+    print(f"开始执行程序: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+    
     # 获取accessToken
     accessToken = get_access_token()
-    print('token', accessToken)
+    print('token:', accessToken)
+    
     # 接收的用户
     user = config.user
     print('user:', user)
-    # 传入省份和市获取天气信息
+    
+    # 获取天气信息
     province, city = config.province, config.city
     weather, max_temperature, min_temperature = get_weather(province, city)
-    isPost = False
-    send_message(user, accessToken, city, weather, max_temperature, min_temperature)
-    isPost = True
+    
+    if None in (weather, max_temperature, min_temperature):
+        print("获取天气失败，程序退出")
+    else:
+        print(f"天气信息: {city} {weather} {min_temperature}~{max_temperature}")
+        send_message(user, accessToken, city, weather, max_temperature, min_temperature)
