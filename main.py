@@ -40,7 +40,7 @@ def get_weather(province, city):
         return None, None, None
 
 # 获取合适长度的每日信息
-def get_daily_message(max_length=20, max_retries=3):
+def get_daily_message(max_length=30, max_retries=8):
     txUrl = "http://apis.tianapi.com/saylove/index"
     key = config.good_Night_Key
     headers = {
